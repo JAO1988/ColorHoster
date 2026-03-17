@@ -35,9 +35,16 @@ impl Keyboards {
 
         while let Some(device) = stream.next().await {
             if is_compatible(&device)
-                && let Some(config) = configs.remove(&(device.vendor_id, device.product_id))
+                && let Some(mut config) = configs.remove(&(device.vendor_id, device.product_id))
             {
-                debug!("Keyboard {} connected!", config.name.bold());
+                if let Some(manufacturer) = device.manufacturer.clone() {
+                    config.vendor = manufacturer;
+                }
+                debug!(
+                    "Keyboard {} {} connected!",
+                    config.name.bold().blue(),
+                    format!("({})", config.vendor).bold().cyan()
+                );
                 match Keyboard::from_config(config, device).await {
                     Err(error) => warn!("Failed to initialize keyboard: {error}"),
                     Ok(keyboard) => {
@@ -74,8 +81,15 @@ impl Keyboards {
                                 configs.lock().unwrap().remove(key)
                             });
 
-                            if let (Some(config), Some(device)) = (config, device) {
-                                debug!("Keyboard {} connected!", config.name.bold());
+                            if let (Some(mut config), Some(device)) = (config, device) {
+                                if let Some(manufacturer) = device.manufacturer.clone() {
+                                    config.vendor = manufacturer;
+                                }
+                                debug!(
+                                    "Keyboard {} {} connected!",
+                                    config.name.bold().blue(),
+                                    format!("({})", config.vendor).bold().cyan()
+                                );
                                 match Keyboard::from_config(config, device).await {
                                     Err(error) => warn!("Failed to initialize keyboard: {error}"),
                                     Ok(keyboard) => {
@@ -89,7 +103,11 @@ impl Keyboards {
                         DeviceEvent::Disconnected(id) => {
                             if let Some(device) = keyboards.lock().await.shift_remove(&id) {
                                 let config = device.into_config().await;
-                                debug!("Keyboard {} disconnected!", config.name.bold());
+                                debug!(
+                                    "Keyboard {} {} disconnected!",
+                                    config.name.bold().blue(),
+                                    format!("({})", config.vendor).bold().cyan()
+                                );
 
                                 configs
                                     .lock()

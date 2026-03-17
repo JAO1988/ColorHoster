@@ -1,3 +1,9 @@
+## 0.7.1
+
+- Added support for the vendor flag on OpenRGB clients.
+
+  The vendor name is read from the manufacturer string from what the OS got off the keyboard's USB firmware when it was plugged in, using the manufacturer field added to async-hid's DeviceInfo in version 0.5.1. The manufacturer name has been compiled into the QMK firmware and is then basically reported to OpenRGB clients.
+
 ## 0.7.0
 
 - (potentially breaking) Direct mode is now always reported to clients at index 0 (this does not affect your JSON configs)

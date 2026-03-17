@@ -88,9 +88,12 @@ pub async fn handle(
             buffer.extend_from_slice(&DEVICE_TYPE_KEYBOARD.to_le_bytes());
             buffer.extend_from_str(&config.name);
             if ctx.protocol_version >= 1 {
-                buffer.extend_from_str("Unknown");
+                buffer.extend_from_str(&config.vendor);
             }
-            buffer.extend_from_str(&format!("{} via ColorHoster", &config.name));
+            buffer.extend_from_str(&format!(
+                "{} {} via ColorHoster",
+                &config.vendor, &config.name
+            ));
             buffer.extend_from_str(env!("CARGO_PKG_VERSION"));
             buffer.extend_from_str(&id);
             buffer.extend_from_str(&format!("HID: {}", id));
